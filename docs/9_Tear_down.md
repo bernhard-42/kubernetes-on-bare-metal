@@ -1,62 +1,55 @@
-# 9 Tear down
+# Tear down
 
-## 9.1 Dashboard
+## Kubernetes cluster
 
-    kubectl -n kube-system delete deploy kubernetes-dashboard
-    kubectl -n kube-system delete svc kubernetes-dashboard
-    kubectl -n kube-system delete role kubernetes-dashboard-minimal
-    kubectl -n kube-system delete rolebinding kubernetes-dashboard-minimal
-    kubectl -n kube-system delete sa kubernetes-dashboard
-    kubectl -n kube-system delete secrets kubernetes-dashboard-key-holder
-    kubectl -n kube-system delete secrets kubernetes-dashboard-certs
-    kubectl -n kube-system delete secrets kubernetes-dashboard-token-g6b7b  
+- Drain and delete all nodes
 
-## 9.2 Kubernetes cluster
+        for i in $(seq 1 6); do kubectl drain beebox0$i --delete-local-data --force --ignore-daemonsets; done
+        for i in $(seq 1 6); do kubectl delete node beebox0$i; done
 
-Drain and delete all nodes
+- Clean up etcd on the master
 
-    for i in $(seq 1 6); do kubectl drain beebox0$i --delete-local-data --force --ignore-daemonsets; done
-    for i in $(seq 1 6); do kubectl delete node beebox0$i; done
+        docker exec -it $(docker ps | grep etcd | grep -v pause | awk '{print $1}') sh
 
-Clean up etcd on the master
+        alias ec="ETCDCTL_API=3 etcdctl --endpoints=localhost:2379 \
+                                        --cacert=/etc/kubernetes/pki/etcd/ca.crt \
+                                        --cert=/etc/kubernetes/pki/etcd/healthcheck-client.crt \
+                                        --key=/etc/kubernetes/pki/etcd/healthcheck-client.key"
+        ec del "" --prefix
 
-    docker exec -it $(docker ps | grep etcd | grep -v pause | awk '{print $1}') sh
+- Reset kubeadm on the master
 
-    alias ec="ETCDCTL_API=3 etcdctl --endpoints=localhost:2379 \
-                                    --cacert=/etc/kubernetes/pki/etcd/ca.crt \
-                                    --cert=/etc/kubernetes/pki/etcd/healthcheck-client.crt \
-                                    --key=/etc/kubernetes/pki/etcd/healthcheck-client.key"
-    ec del "" --prefix
+        sudo kubeadm reset
+        sudo rm -fr ~/.kube* /root/.kube*
 
-Reset kubeadm on the master
+- Unistall docker and kubernetes on all nodes
 
-    sudo kubeadm reset
-    sudo rm -fr ~/.kube* /root/.kube*
+        sudo docker rm -f $(docker ps -a | awk '{print $1}')
+        sudo docker rmi -f $(docker images | awk '{print $3}')
+        sudo apt-get purge kube*
+        sudo rm -fr /etc/kubernetes /etc/cni /var/lib/etcd/ /var/lib/cni /var/lib/kubelet/ /var/lib/heketi/ /var/lib/calico/ 
 
-On all nodes
+- Reset iptables (ipv4)
 
-    sudo docker rm -f $(docker ps -a | awk '{print $1}')
-    sudo docker rmi -f $(docker images | awk '{print $3}')
-    sudo apt-get purge kube*
-    sudo rm -fr /etc/kubernetes /etc/cni /var/lib/etcd/ /var/lib/cni /var/lib/kubelet/ /var/lib/heketi/ /var/lib/calico/ 
-    
-    # Source: https://unix.stackexchange.com/questions/13755/how-to-reset-all-iptables-settings#13756
-    # RESET DEFAULT POLICIES
-    iptables -P INPUT ACCEPT
-    iptables -P FORWARD ACCE^PT
-    iptables -P OUTPUT ACCEPT
-    iptables -t nat -P PREROUTING ACCEPT
-    iptables -t nat -P POSTROUTING ACCEPT
-    iptables -t nat -P OUTPUT ACCEPT
-    iptables -t mangle -P PREROUTING ACCEPT
-    iptables -t mangle -P OUTPUT ACCEPT
+        # Source: https://unix.stackexchange.com/questions/13755/how-to-reset-all-iptables-settings#13756
+        # RESET DEFAULT POLICIES
+        iptables -P INPUT ACCEPT
+        iptables -P FORWARD ACCE^PT
+        iptables -P OUTPUT ACCEPT
+        iptables -t nat -P PREROUTING ACCEPT
+        iptables -t nat -P POSTROUTING ACCEPT
+        iptables -t nat -P OUTPUT ACCEPT
+        iptables -t mangle -P PREROUTING ACCEPT
+        iptables -t mangle -P OUTPUT ACCEPT
 
-    # FLUSH ALL RULES, ERASE NON-DEFAULT CHAINS
-    iptables -F
-    iptables -X
-    iptables -t nat -F
-    iptables -t nat -X
-    iptables -t mangle -F
-    iptables -t mangle -X
+        # FLUSH ALL RULES, ERASE NON-DEFAULT CHAINS
+        iptables -F
+        iptables -X
+        iptables -t nat -F
+        iptables -t nat -X
+        iptables -t mangle -F
+        iptables -t mangle -X
 
-    sudo systemctl reboot
+- Reboot system
+
+        sudo systemctl reboot

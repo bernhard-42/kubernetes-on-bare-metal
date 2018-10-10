@@ -1,8 +1,8 @@
-# 4 Persistent Storage Provider via Glusterfs and Heketi 8.0.0 
+# Persistent Storage Provider via Glusterfs and Heketi 8.0.0 
 
 Based on [https://github.com/heketi/heketi/blob/master/docs/admin/install-kubernetes.md](https://github.com/heketi/heketi/blob/master/docs/admin/install-kubernetes.md)
 
-## 4.1 Prepare file based devices
+## Prepare file based devices
 
     sudo fallocate -l 50G /opt/sdv1.store
     sudo mknod /dev/fake-sdv1 b 7 200 # 200 should be high enough for a free loop### device
@@ -14,7 +14,7 @@ Based on [https://github.com/heketi/heketi/blob/master/docs/admin/install-kubern
     tar -ztvf heketi-client-v8.0.0.darwin.amd64.tar.gz
     PATH=$PATH:"$(pwd)/heketi-client/bin"
 
-## 4.3 Install Heketiand Glusterfs
+## Install Heketiand Glusterfs
 
 - Get git repo
 

@@ -1,19 +1,19 @@
-# 1 Kubernetes
+# Kubernetes
 
-Note: On a mac deactivate ipv6 (https://www.xgadget.de/anleitung/macos-ipv6-deaktivieren-am-mac/)
+Note: On a mac deactivate ipv6 [https://www.xgadget.de/anleitung/macos-ipv6-deaktivieren-am-mac/](https://www.xgadget.de/anleitung/macos-ipv6-deaktivieren-am-mac/)
 
     networksetup -setv6off Ethernet
     networksetup -setv6off Wi-Fi
+
+Reason: kubeadm sets kube-proxy listenaddr to `0.0.0.0` instead of `::`.
 
 Can be reactivated via 
 
     networksetup -setv6automatic Wi-Fi 
     networksetup -setv6automatic Ethernet
 
-Reason: kubeadm sets kube-proxy listenaddr to 0.0.0.0 instead of ::
 
-
-## 1.1 Install kubernetes executables on each node
+## Install kubernetes executables on each node
 
 - Preparations
 
@@ -25,6 +25,8 @@ Reason: kubeadm sets kube-proxy listenaddr to 0.0.0.0 instead of ::
 
 - Install kubernetes executables (as root)
 
+    Note: For the time being (Oct 2018) use v1.11.3 instead of v1.12.x to avoid issues with flannel
+
         curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
         cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
         deb http://apt.kubernetes.io/ kubernetes-xenial main
@@ -34,34 +36,37 @@ Reason: kubeadm sets kube-proxy listenaddr to 0.0.0.0 instead of ::
         apt-get install -y kubelet=1.11.3-00 kubeadm=1.11.3-00 kubectl=1.11.3-00
         apt-mark hold kubelet kubeadm kubectl
 
-- Load all kubernetes images
+- Optional: Load all kubernetes images
 
         kubeadm config images pull
 
-## 1.2 Initialize kubernetes cluster on the admin node
+
+## Initialize kubernetes cluster on the admin node
 
 - Initialize cluster (as root)
     
-        kubeadm init --pod-network-cidr=10.244.0.0/16 # Flannel, Canal
+        kubeadm init --pod-network-cidr=10.244.0.0/16 # cidr range for Flannel and Canal
 
-- Allow non root user
+- Configure access for root (and non root) user
 
         rm -fr ~/.kube
         mkdir -p $HOME/.kube
         sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
         sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
-## 1.3 Install network plugin flannel
+
+## Install network plugin flannel
 
 - Install flannel on admin node
 
        kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 
-- Test kubernetes installation and check that coredns gets successfully instantiated
+- Test kubernetes installation and check that `coredns` gets successfully instantiated
 
         kubectl get po --all-namespaces
 
-## 1.4 Join nodes
+
+## Join nodes
 
 - Run the command that was provided by `kubeadm init` similar to the following on all nodes except master
 
@@ -74,7 +79,8 @@ Reason: kubeadm sets kube-proxy listenaddr to 0.0.0.0 instead of ::
 
     kubectl get nodes
 
-## 1.5 Enable remote control
+
+## Enable remote control
 
 - On the local laptop 
 
@@ -83,42 +89,44 @@ Reason: kubeadm sets kube-proxy listenaddr to 0.0.0.0 instead of ::
         mkdir -p ~/.kube
         mv admin.conf ~/.kube/config
 
-## 1.6 Test kubernetes and networking
+Note: From now on it is expected that kubectl commands get issued from the laptop (for remote kubernets cluster)
+
+## Test kubernetes and networking
 
 - Install kubernetes tutorial bootcamp app
 
-    kubectl run kubernetes-bootcamp --image=gcr.io/google-samples/kubernetes-bootcamp:v1 --port=8080
-    kubectl get deployments
-    kubectl get po
+        kubectl run kubernetes-bootcamp --image=gcr.io/google-samples/kubernetes-bootcamp:v1 --port=8080
+        kubectl get deployments
+        kubectl get po
 
 - Run kubernetes proxy in another terminal on the laptop
 
-    kubectl proxy
+        kubectl proxy
 
 - Test installed app via local proxy
 
-    export POD_NAME=$(kubectl get pods -o go-template --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')
-    echo Name of the Pod: $POD_NAME
-    curl http://localhost:8001/api/v1/namespaces/default/pods/$POD_NAME/proxy/
+        export POD_NAME=$(kubectl get pods -o go-template --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')
+        echo Name of the Pod: $POD_NAME
+        curl http://localhost:8001/api/v1/namespaces/default/pods/$POD_NAME/proxy/
     
 - Expose app
 
-    kubectl expose deployment/kubernetes-bootcamp --type="NodePort" --port 8080
-    kubectl get services -o wide
-    kubectl describe services/kubernetes-bootcamp
+        kubectl expose deployment/kubernetes-bootcamp --type="NodePort" --port 8080
+        kubectl get services -o wide
+        kubectl describe services/kubernetes-bootcamp
 
 - Test via local proxy
 
-    curl http://localhost:8001/api/v1/namespaces/default/services/http:kubernetes-bootcamp:/proxy/
+        curl http://localhost:8001/api/v1/namespaces/default/services/http:kubernetes-bootcamp:/proxy/
 
 - Test installed app via NodePort
 
-    export NODE_PORT=$(kubectl get services/kubernetes-bootcamp -o go-template='{{(index .spec.ports 0).nodePort}}')
-    echo NODE_PORT=$NODE_PORT
-    curl beebox01:$NODE_PORT
+        export NODE_PORT=$(kubectl get services/kubernetes-bootcamp -o go-template='{{(index .spec.ports 0).nodePort}}')
+        echo NODE_PORT=$NODE_PORT
+        curl beebox01:$NODE_PORT
 
 - Cleanup
 
-    kubectl delete deploy kubernetes-bootcamp
-    kubectl delete svc kubernetes-bootcamp
+        kubectl delete deploy kubernetes-bootcamp
+        kubectl delete svc kubernetes-bootcamp
 

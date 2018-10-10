@@ -1,12 +1,12 @@
-# 3 Helm with RBAC
+# Helm with RBAC
 
-    - Create a service account
+- Create a service account
 
-        $ kubectl apply -f helm-rbac-config.yaml
+        kubectl apply -f helm-rbac-config.yaml
 
-    - Install and initialize helm
+- Install and initialize helm
 
-        $ brew install kubernetes-helm
-        $ helm init --service-account tiller
+        brew install kubernetes-helm
+        helm init --service-account tiller
 
 
