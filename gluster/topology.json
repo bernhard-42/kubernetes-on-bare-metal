@@ -1,0 +1,53 @@
+{
+  "clusters": [
+    {
+      "nodes": [
+        {
+          "node": {
+            "hostnames": { "manage": [ "beebox02" ], "storage": ["192.168.124.146" ] },
+            "zone": 1
+          },
+          "devices": [
+            { "name": "/dev/fake-sdv1", "destroydata": true }
+          ]
+        },
+        {
+          "node": {
+            "hostnames": { "manage": [ "beebox03" ], "storage": ["192.168.124.147" ] },
+            "zone": 1
+          },
+          "devices": [
+            { "name": "/dev/fake-sdv1", "destroydata": true }
+          ]
+        },
+        {
+          "node": {
+            "hostnames": { "manage": [ "beebox04" ], "storage": ["192.168.124.148" ] },
+            "zone": 1
+          },
+          "devices": [
+            { "name": "/dev/fake-sdv1", "destroydata": true }
+          ]
+        },
+        {
+          "node": {
+            "hostnames": { "manage": [ "beebox05" ], "storage": ["192.168.124.149" ] },
+            "zone": 1
+          },
+          "devices": [
+            { "name": "/dev/fake-sdv1", "destroydata": true }
+          ]
+        },
+        {
+          "node": {
+            "hostnames": { "manage": [ "beebox06" ], "storage": ["192.168.124.150" ] },
+            "zone": 1
+          },
+          "devices": [
+            { "name": "/dev/fake-sdv1", "destroydata": true }
+          ]
+        }
+      ]
+    }
+  ]
+}

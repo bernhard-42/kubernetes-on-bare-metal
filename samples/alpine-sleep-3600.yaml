@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: alpine
+spec:
+  selector:
+    name: alpine
+  ports:
+  - name: ws
+    port: 8080
+    # targetPort: 8080
+  type: NodePort
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: alpine1
+  labels:
+    name: alpine
+spec:
+  # hostname: alpine-1
+  containers:
+  - image: alpine
+    command:
+      - sleep
+      - "3600"
+    name: alpine
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: alpine2
+  labels:
+    name: alpine
+spec:
+  # hostname: alpine-2
+  containers:
+  - image: alpine
+    command:
+      - sleep
+      - "3600"
+    name: alpine
