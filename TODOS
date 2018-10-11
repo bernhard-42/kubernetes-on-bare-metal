@@ -1,1 +1,1 @@
-- Install ingress
+- Change kube-proxy bindAddress to ::
