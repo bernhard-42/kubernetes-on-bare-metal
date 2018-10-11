@@ -28,4 +28,5 @@ shift $((OPTIND-1))
 
 [[ "$1" == "" ]] && usage
 
-kubectl get svc $1 -n $NAMESPACE --template='{{(index (index .status.loadBalancer.ingress) 0).ip}}')
+# kubectl get svc $1 -n $NAMESPACE --template='{{(index (index .status.loadBalancer.ingress) 0).ip}}'
+kubectl get svc -n $NAMESPACE | awk '/^'$1/' {print $4}'
