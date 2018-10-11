@@ -25,5 +25,3 @@ Edit IP ranges in `layer2-config.yaml` and apply
 ## Test LoadBalancer
 
     kubectl apply -f metallb/manifests/tutorial-2.yaml
-    
-

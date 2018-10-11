@@ -8,5 +8,3 @@
 
         brew install kubernetes-helm
         helm init --service-account tiller
-
-

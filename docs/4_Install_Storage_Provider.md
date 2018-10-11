@@ -27,37 +27,41 @@ Based on [https://github.com/heketi/heketi/blob/master/docs/admin/install-kubern
         cp heketi/extras/kubernetes/heketi.json .
         cp heketi/extras/kubernetes/topology-sample.json topology.json
 
-- Install Glusterfs 
+- Set Gluster namesapce
+        
+        export NAMESPACE=gluster-system
 
-        kubectl create -f heketi/extras/kubernetes/glusterfs-daemonset.json
+- Install Glusterfs 
+        
+        kubectl -n $NAMESPACE create -f heketi/extras/kubernetes/glusterfs-daemonset.json
         kubectl label node beebox02 beebox03 beebox04 beebox05 beebox06 storagenode=glusterfs
 
 - Check until all glusterfs nodes are running
 
-      kubectl get pods -o wide
+      kubectl -n $NAMESPACE get pods -o wide
 
 - Create service account
 
-        kubectl create -f heketi/extras/kubernetes/heketi-service-account.json
-        kubectl create clusterrolebinding heketi-gluster-admin \
+        kubectl -n $NAMESPACE create -f heketi/extras/kubernetes/heketi-service-account.json
+        kubectl -n $NAMESPACE create clusterrolebinding heketi-gluster-admin \
                 --clusterrole=edit \
-                --serviceaccount=default:heketi-service-account
+                --serviceaccount=$NAMESPACE:heketi-service-account
 
 - Create a Kubernetes secret that will hold the configuration of our Heketi instance (edit keys before)
 
-        kubectl create secret generic heketi-config-secret --from-file=./heketi.json
+        kubectl -n $NAMESPACE create secret generic heketi-config-secret --from-file=./heketi.json
 
 - Deploy initial pod
 
-        kubectl create -f heketi/extras/kubernetes/heketi-bootstrap.json
+        kubectl -n $NAMESPACE create -f heketi/extras/kubernetes/heketi-bootstrap.json
 
 - Check until pod is running
 
-       kubectl get pods -o wide
+       kubectl -n $NAMESPACE get pods -o wide
 
 - Forward heketi-cli port in separate terminal
 
-        kubectl port-forward $(kubectl get po | awk '/heketi/ {print $1}') 8080:8080
+        kubectl -n $NAMESPACE port-forward $(kubectl -n $NAMESPACE get po | awk '/heketi/ {print $1}') 8080:8080
         curl localhost:8080/hello
 
 - Prepare topology.json
@@ -122,27 +126,30 @@ Based on [https://github.com/heketi/heketi/blob/master/docs/admin/install-kubern
 
 - Set up a volume for heketi in glusterfs
 
-        heketi-client/bin/heketi-cli setup-openshift-heketi-storage
-        kubectl create -f heketi-storage.json
+        heketi-cli setup-openshift-heketi-storage
+        kubectl -n $NAMESPACE create -f heketi-storage.json
 
 - Wait until job is finished
 
-        kubectl get jobs
+        kubectl -n $NAMESPACE get jobs
 
 - Delete bootstrap heketi
 
-        kubectl delete all,service,jobs,deployment,secret --selector="deploy-heketi"
+        kubectl -n $NAMESPACE delete all,service,jobs,deployment,secret --selector="deploy-heketi"
 
 - Create final heketi
 
-        kubectl create -f heketi/extras/kubernetes/heketi-deployment.json 
+        kubectl -n $NAMESPACE create -f heketi/extras/kubernetes/heketi-deployment.json 
 
 - Optional: Expose via NodePort
 
-        kubectl get svc heketi -o yaml | sed 's/type:.*$/type: NodePort/g' | kubectl replace -f -
-        export HEKETI_CLI_SERVER="http://beebox01:$(kubectl get svc heketi --template='{{(index .spec.ports 0).nodePort}}')"
+        kubectl -n $NAMESPACE get svc heketi -o yaml | sed 's/type:.*$/type: NodePort/g' | kubectl -n $NAMESPACE replace -f -
+        export HEKETI_CLI_SERVER="http://beebox01:$(kubectl -n $NAMESPACE get svc heketi --template='{{(index .spec.ports 0).nodePort}}')"
         heketi-cli volume list
 
+- Cleanup
+
+        unset NAMESPACE
 
 ## Create Gluster Storage Class
 
@@ -160,7 +167,7 @@ Based on [https://github.com/heketi/heketi/blob/master/docs/admin/install-kubern
           restuser: "admin"
           restuserkey: "sercret123"
      
-    - For the `resturl` take the service's cluster IP
+    - For the `resturl` take the service's cluster IP: `kubectl -n gluster-system get svc heketi --template '{{.spec.clusterIP}}'`
     - For `restuser` and `restuserkey` refer back to `heketi.json`
 
 - and add it
@@ -171,12 +178,12 @@ Based on [https://github.com/heketi/heketi/blob/master/docs/admin/install-kubern
 
 - Create PVC
 
-        kubectl create -f pvc.yaml
+        kubectl create -f example/pvc.yaml
         kubectl get pv,pvc
 
 - Use PVC for nginx
 
-        kubectl apply -f nginx.yaml
+        kubectl apply -f example/nginx.yaml
 
 - Test
 
@@ -197,8 +204,13 @@ Based on [https://github.com/heketi/heketi/blob/master/docs/admin/install-kubern
 
 - Test again
 
-        kubectl apply -f nginx.yaml
+        kubectl apply -f example/nginx.yaml
         NODE_PORT=$(kubectl get services/nginx -o go-template='{{(index .spec.ports 0).nodePort}}')
         curl beebox01:$NODE_PORT
 
+- Clean up
 
+        kubectl delete svc nginx
+        kubectl delete po nginx-pod1
+        kubectl delete pvc gluster1
+        

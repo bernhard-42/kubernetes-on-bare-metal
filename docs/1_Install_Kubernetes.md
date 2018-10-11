@@ -5,7 +5,7 @@ Note: On a mac deactivate ipv6 [https://www.xgadget.de/anleitung/macos-ipv6-deak
     networksetup -setv6off Ethernet
     networksetup -setv6off Wi-Fi
 
-Reason: kubeadm sets kube-proxy listenaddr to `0.0.0.0` instead of `::`.
+Reason: kubeadm sets kube-proxy `bindAddress` to `0.0.0.0` instead of `::`.
 
 Can be reactivated via 
 
@@ -22,6 +22,10 @@ Can be reactivated via
         swapoff -a                                   # kubernetes does not run with swap
         sysctl net.bridge.bridge-nf-call-iptables=1  # necessary for overlay networks
         modprobe dm_thin_pool                        # needed for glusterfs
+
+- Install docker-ce on all nodes
+
+        sudo apt-get install docker-ce
 
 - Install kubernetes executables (as root)
 
@@ -43,9 +47,9 @@ Can be reactivated via
 
 ## Initialize kubernetes cluster on the admin node
 
-- Initialize cluster (as root)
+- Initialize cluster (as root with cidr range for Flannel and Canal)
     
-        kubeadm init --pod-network-cidr=10.244.0.0/16 # cidr range for Flannel and Canal
+        kubeadm init --pod-network-cidr=10.244.0.0/16
 
 - Configure access for root (and non root) user
 
@@ -96,8 +100,7 @@ Note: From now on it is expected that kubectl commands get issued from the lapto
 - Install kubernetes tutorial bootcamp app
 
         kubectl run kubernetes-bootcamp --image=gcr.io/google-samples/kubernetes-bootcamp:v1 --port=8080
-        kubectl get deployments
-        kubectl get po
+        kubectl get po # wait until instantiated
 
 - Run kubernetes proxy in another terminal on the laptop
 
