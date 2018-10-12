@@ -21,11 +21,13 @@
 - Define the two customization files
 
         cat <<EOF > overlays/custom/kustomization.yaml
+        namespace: cadvisor-system
         bases:
         - ../../base
         patches:
         - schedule-master.yaml
         - cadvisor-args.yaml
+        - hostport.yaml
         EOF
 
 - Add some parameters to cAdvisor to reduce load on local kube proxy
@@ -84,9 +86,21 @@
         EOF
 
 - Deploy customized manifest
+    - Create the namespace set in kustomization.yaml
+       
+             kubectl create ns cadvisor-system
+    
+    - Insall customized template into `cadvisor-system`
 
-    kustomize build overlays/custom | kubectl apply -f -
-    kubectl -n cadvisor get po --watch
+            kustomize build overlays/custom | kubectl apply -f -
+            
+    - Delete the obsolete namespace create by the standard manifest
+
+            kubectl delete ns cadvisor
+
+    - Wait until deployed
+
+            kubectl -n cadvisor-system get po -o wide --watch
 
 ## Open cAdvisor per node
 

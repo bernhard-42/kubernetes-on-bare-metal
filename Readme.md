@@ -91,7 +91,7 @@ Note, since Voyager uses CRDs the Voyager Ingresses are not shown in Kubernetes 
 ### Install Simple Container Monitoring
 
 - Simple monitoring of each node with [cAdvisor](https://github.com/google/cadvisor).
-- Namespace: `cadvisor`
+- Namespace: `cadvisor-system`
 
 ==> [docs/8_Install_cAdvisor.md](docs/8_Install_cAdvisor.md).
 
