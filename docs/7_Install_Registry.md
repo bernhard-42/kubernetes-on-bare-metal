@@ -8,18 +8,27 @@
 
 - Installation
 
+        kubectl create ns registry-system
+
         CONFIG=\
         persistence.enabled=true,\
         persistence.storageClass=gluster-heketi,\
         persistence.size=10Gi,\
         service.type=LoadBalancer
 
-        helm install --name registry --set $CONFIG stable/docker-registry
+        helm install --name registry --set $CONFIG \
+                     --namespace registry-system \
+                     stable/docker-registry
 
 
 ## Enable insecure registry for *Docker for Mac*
 
-Retrive the loadbalancer IP (REG_IP = e.g. 192.168.124.230) and add `192.168.124.230:5000` to `Daemon` Preferences. The  restart *Docker for Mac*
+Retrieve the loadbalancer IP 
+
+    k8s-lb.sh -n registry-system registry
+
+(e.g. 192.168.124.230) and add `192.168.124.230:5000` to `Daemon` Preferences. Then restart *Docker for Mac*
+
 
 ## Enable insecure registry on kubernetes nodes
 
@@ -79,6 +88,10 @@ On all nodes add '{ "insecure-registries" : [ "192.168.124.230:5000" ] }' to `/e
 
             kubectl apply -f alpine-enhanced.yaml
             kubectl get po alpine-enhanced --watch
+
+            kubectl describe po alpine-enhanced | grep Image
+            #     Image:         192.168.124.230:5000/alpine-enhanced:1.0.0
+            #     Image ID:      docker-pullable://192.168.124.230:5000/alpine-enhanced@sha256:77952 ...
 
     - Access container
 
