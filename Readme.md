@@ -77,7 +77,7 @@ To make it easier to see which component belongs to which of the plugins / helpe
 
 ==> [docs/6_Install_Ingress_controller.md](docs/6_Install_Ingress_controller.md)
 
-Note, since Voyager uses CRDs the Voyager Ingresses are not shown in Kubernetes Dashboard.
+Note: Since Voyager uses CRDs, the Voyager Ingresses are not shown in Kubernetes Dashboard.
 
 
 ### Install the Docker Registry
@@ -95,6 +95,7 @@ Note, since Voyager uses CRDs the Voyager Ingresses are not shown in Kubernetes 
 
 ==> [docs/8_Install_cAdvisor.md](docs/8_Install_cAdvisor.md).
 
+Note: This is also an example of using [kustomize](https://kustomize.io/) to adapt manifests with changing the original files.
 
 ## Cleanup
 

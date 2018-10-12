@@ -86,7 +86,7 @@
         EOF
 
 - Deploy customized manifest
-    - Create the namespace set in kustomization.yaml
+    - Create the namespace set in `kustomization.yaml`
        
              kubectl create ns cadvisor-system
     
