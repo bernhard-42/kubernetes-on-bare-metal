@@ -1,43 +1,20 @@
 # Kubernetes
 
-Note: On a mac deactivate ipv6 [https://www.xgadget.de/anleitung/macos-ipv6-deaktivieren-am-mac/](https://www.xgadget.de/anleitung/macos-ipv6-deaktivieren-am-mac/)
-
-    networksetup -setv6off Ethernet
-    networksetup -setv6off Wi-Fi
-
-Reason: kubeadm sets kube-proxy `bindAddress` to `0.0.0.0` instead of `::`.
-
-Can be reactivated via 
-
-    networksetup -setv6automatic Wi-Fi 
-    networksetup -setv6automatic Ethernet
-
-
 ## Install kubernetes executables on each node
-
-- Preparations
-
-        sudo -i
-
-        swapoff -a                                   # kubernetes does not run with swap
-        sysctl net.bridge.bridge-nf-call-iptables=1  # necessary for overlay networks
-        modprobe dm_thin_pool                        # needed for glusterfs
-
-- Install docker-ce on all nodes
-
-        sudo apt-get install docker-ce
 
 - Install kubernetes executables (as root)
 
     Note: For the time being (Oct 2018) use v1.11.3 instead of v1.12.x to avoid issues with flannel
+
+        sudo -i
 
         curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
         cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
         deb http://apt.kubernetes.io/ kubernetes-xenial main
         EOF
         apt-get update
-        # apt-get install -y kubelet kubeadm kubectl
-        apt-get install -y kubelet=1.11.3-00 kubeadm=1.11.3-00 kubectl=1.11.3-00
+        apt-get install -y kubelet kubeadm kubectl
+        # apt-get install -y kubelet=1.11.3-00 kubeadm=1.11.3-00 kubectl=1.11.3-00
         apt-mark hold kubelet kubeadm kubectl
 
 - Optional: Load all kubernetes images
@@ -61,9 +38,17 @@ Can be reactivated via
 
 ## Install network plugin flannel
 
-- Install flannel on admin node
+- Install canal on admin node
 
-       kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+    This provides an CNI overlay network by `flannel` and network policies by `calico`
+
+        BASE_URL=https://docs.projectcalico.org/v3.2/getting-started/kubernetes/
+        kubectl apply -f $BASE_URL/installation/hosted/canal/rbac.yaml
+        kubectl apply -f $BASE_URL/installation/hosted/canal/canal.yaml
+
+    Note: For a "flannel only" deployment use the master version from github (until 0.11): 
+    
+        kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 
 - Test kubernetes installation and check that `coredns` gets successfully instantiated
 
@@ -81,7 +66,7 @@ Can be reactivated via
 
 - Check that all nodes are running
 
-    kubectl get nodes
+    kubectl get nodes --watch
 
 
 ## Enable remote control
@@ -95,41 +80,64 @@ Can be reactivated via
 
 Note: From now on it is expected that kubectl commands get issued from the laptop (for remote kubernets cluster)
 
+
 ## Test kubernetes and networking
 
 - Install kubernetes tutorial bootcamp app
 
-        kubectl run kubernetes-bootcamp --image=gcr.io/google-samples/kubernetes-bootcamp:v1 --port=8080
-        kubectl get po # wait until instantiated
+        for i in 0 1; do 
+            kubectl run kubernetes-bootcamp$i --image=gcr.io/google-samples/kubernetes-bootcamp:v1 --port=8080
+        done
+        kubectl get po --watch
 
-- Run kubernetes proxy in another terminal on the laptop
+- Run kubernetes proxy in **another** terminal on the laptop (blocking command)
 
         kubectl proxy
 
-- Test installed app via local proxy
+- Test installed app via local proxy (ensure to have ./bin in the PATH to access the local k82 helpers)
 
-        export POD_NAME=$(kubectl get pods -o go-template --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')
-        echo Name of the Pod: $POD_NAME
-        curl http://localhost:8001/api/v1/namespaces/default/pods/$POD_NAME/proxy/
+        for i in 0 1; do
+            curl http://localhost:8001/api/v1/namespaces/default/pods/$(k8s-pod-name.sh -c bootcamp$i)/proxy/
+        done
     
 - Expose app
 
-        kubectl expose deployment/kubernetes-bootcamp --type="NodePort" --port 8080
-        kubectl get services -o wide
-        kubectl describe services/kubernetes-bootcamp
+        for i in 0 1; do
+            kubectl expose deployment/kubernetes-bootcamp$i --type="NodePort" --port 8080
+            kubectl describe services/kubernetes-bootcamp$i
+            echo -e "\nNodeport for bootcamp0: $(k8s-nodeport.sh -e bootcamp$i)\n"
+        done
 
 - Test via local proxy
 
-        curl http://localhost:8001/api/v1/namespaces/default/services/http:kubernetes-bootcamp:/proxy/
+        for i in 0 1; do
+            curl http://localhost:8001/api/v1/namespaces/default/services/http:kubernetes-bootcamp$i:/proxy/
+        done
 
 - Test installed app via NodePort
 
-        export NODE_PORT=$(kubectl get services/kubernetes-bootcamp -o go-template='{{(index .spec.ports 0).nodePort}}')
-        echo NODE_PORT=$NODE_PORT
-        curl beebox01:$NODE_PORT
+        for i in 0 1; do
+            curl -v beebox01:$(k8s-nodeport.sh -e bootcamp$i)
+        done
+
+- Test of DNS and cross container networking
+
+    Enter pod kubernetes-bootcamp0
+
+        k8s-exec.sh -c bootcamp0
+
+        Executing 'sh' on pod 'kubernetes-bootcamp0-7775b6ccc7-lpx5h' (1)
+        # 
+
+    Curl the other pod kubernetes-bootcamp1
+
+        curl kubernetes-bootcamp1.default.svc.cluster.local:8080
+        exit
 
 - Cleanup
 
-        kubectl delete deploy kubernetes-bootcamp
-        kubectl delete svc kubernetes-bootcamp
+        for i in 0 1; do
+            kubectl delete deploy kubernetes-bootcamp$i
+            kubectl delete svc kubernetes-bootcamp$i
+        done
 

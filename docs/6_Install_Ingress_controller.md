@@ -6,6 +6,7 @@ Based on [https://appscode.com/products/voyager/8.0.1/setup/install/](https://ap
 
 - Ceate namespace
 
+        cd ingress
         kubectl create ns voyager-system
 
 - Add Voyager helm repo
@@ -33,11 +34,11 @@ Based on [https://appscode.com/products/voyager/8.0.1/setup/install/](https://ap
 
 - Call web endpoint
 
-        curl -vv 35.226.114.148 -H "Host: web.example.com" 
+        curl $(k8s-lb.sh -c voyager-test-ingress)  -H "Host: web.example.com"
 
 - Call rest endpoint
 
-        curl -vv 35.226.114.148 -H "Host: app.example.com" 
+        curl $(k8s-lb.sh -c voyager-test-ingress)  -H "Host: app.example.com"
 
 - Clean up
 

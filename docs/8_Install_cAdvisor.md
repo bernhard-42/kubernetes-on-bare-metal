@@ -85,9 +85,9 @@
 
 - Deploy customized manifest
 
-    kustomize build overlay/custom | kubectl apply -f -
+    kustomize build overlays/custom | kubectl apply -f -
+    kubectl -n cadvisor get po --watch
 
 ## Open cAdvisor per node
 
-    open http://<node>:9999
-
+    open http://beebox01:9999

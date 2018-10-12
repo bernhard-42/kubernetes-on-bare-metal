@@ -16,10 +16,8 @@
 
 - Get token for service account
 
-        alias kcs="kubectl -n kube-system"
-        kcs describe secret $(kcs get secret | grep dash | grep token | awk '{print $1}') | grep "token:"
-
-        token:      eyJ ...       <== THIS IS THE LOGIN TOKEN
+        k8s-dashboard-token.sh
+        eyJh ...       <== THIS IS THE LOGIN TOKEN
 
 - Dashboard browser URL:
 

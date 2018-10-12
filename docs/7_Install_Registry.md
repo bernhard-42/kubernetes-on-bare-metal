@@ -2,25 +2,24 @@
 
 ## Install docker registry with helm
 
-Notes:
+- Notes:
+    - This is an insecure registry sufficient for my dev environment.
+    - Provide 10GB of persitent storage in storage class `gluster-heketi` for the images:
 
-- This is an insecure registry sufficient for my dev environment.
-- Provide 10GB of persitent storage in storage class `gluster-heketi` for the images:
+- Installation
 
-Installation
+        CONFIG=\
+        persistence.enabled=true,\
+        persistence.storageClass=gluster-heketi,\
+        persistence.size=10Gi,\
+        service.type=LoadBalancer
 
-    CONFIG=\
-    persistence.enabled=true,\
-    persistence.storageClass=gluster-heketi,\
-    persistence.size=10Gi,\
-    service.type=LoadBalancer
-
-    helm install --name registry --set $CONFIG stable/docker-registry
+        helm install --name registry --set $CONFIG stable/docker-registry
 
 
 ## Enable insecure registry for *Docker for Mac*
 
-Retrive the loadbalancer IP (e.g. REG_IP=192.168.124.230) and add `REG_IP:5000` to `Daemon` Preferences. The  restart *Docker for Mac*
+Retrive the loadbalancer IP (REG_IP = e.g. 192.168.124.230) and add `192.168.124.230:5000` to `Daemon` Preferences. The  restart *Docker for Mac*
 
 ## Enable insecure registry on kubernetes nodes
 
@@ -45,7 +44,7 @@ On all nodes add '{ "insecure-registries" : [ "192.168.124.230:5000" ] }' to `/e
             CMD sleep 2147483648
             EOF
 
-            docker build --force-rm -t $REG_IP:5000/alpine-enhanced:1.0.0 .
+            docker build --force-rm -t 192.168.124.230:5000/alpine-enhanced:1.0.0 .
 
             docker images
             #  REPOSITORY                             TAG      IMAGE ID      CREATED        SIZE
@@ -54,7 +53,7 @@ On all nodes add '{ "insecure-registries" : [ "192.168.124.230:5000" ] }' to `/e
 
     - Push image to registry
 
-            docker push $REG_IP:5000/alpine-enhanced:1.0.0
+            docker push 192.168.124.230:5000/alpine-enhanced:1.0.0
 
 - On the kubernetes cluster
 
@@ -79,7 +78,12 @@ On all nodes add '{ "insecure-registries" : [ "192.168.124.230:5000" ] }' to `/e
     - Apply manifest
 
             kubectl apply -f alpine-enhanced.yaml
+            kubectl get po alpine-enhanced --watch
 
     - Access container
 
             kubectl exec -it alpine-enhanced bash
+
+    - Clean up
+
+            kubectl delete po alpine-enhanced

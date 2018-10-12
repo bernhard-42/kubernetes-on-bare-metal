@@ -2,7 +2,7 @@
 
 - Create a service account
 
-        kubectl apply -f helm-rbac-config.yaml
+        kubectl apply -f helm/helm-rbac-config.yaml
 
 - Install and initialize helm
 

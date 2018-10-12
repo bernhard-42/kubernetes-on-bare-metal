@@ -25,3 +25,13 @@ Edit IP ranges in `layer2-config.yaml` and apply
 ## Test LoadBalancer
 
     kubectl apply -f metallb/manifests/tutorial-2.yaml
+    kubectl get po --watch
+
+    LB=$(k8s-lb.sh -e nginx)
+    echo $LB
+    curl $LB:80
+
+## Clean up
+
+    kubectl delete deploy nginx
+    kubectl delete svc nginx

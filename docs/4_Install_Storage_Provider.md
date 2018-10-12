@@ -5,7 +5,7 @@ Based on [https://github.com/heketi/heketi/blob/master/docs/admin/install-kubern
 ## Prepare file based devices
 
     sudo fallocate -l 50G /opt/sdv1.store
-    sudo mknod /dev/fake-sdv1 b 7 200 # 200 should be high enough for a free loop### device
+    sudo mknod /dev/fake-sdv1 b 7 200            # 200 should be high enough for a free loop### device
     sudo losetup /dev/fake-sdv1 /opt/sdv1.store
 
 ## 4.2 Install heketi-cli
@@ -30,15 +30,16 @@ Based on [https://github.com/heketi/heketi/blob/master/docs/admin/install-kubern
 - Set Gluster namesapce
         
         export NAMESPACE=gluster-system
+        kubectl create ns $NAMESPACE
 
 - Install Glusterfs 
         
         kubectl -n $NAMESPACE create -f heketi/extras/kubernetes/glusterfs-daemonset.json
         kubectl label node beebox02 beebox03 beebox04 beebox05 beebox06 storagenode=glusterfs
 
-- Check until all glusterfs nodes are running
+- Wait for the node to be installed (this can take some minutes)
 
-      kubectl -n $NAMESPACE get pods -o wide
+        kubectl -n $NAMESPACE get pods -o wide --watch
 
 - Create service account
 
@@ -57,11 +58,15 @@ Based on [https://github.com/heketi/heketi/blob/master/docs/admin/install-kubern
 
 - Check until pod is running
 
-       kubectl -n $NAMESPACE get pods -o wide
+       kubectl -n $NAMESPACE get pods -o wide --watch
 
 - Forward heketi-cli port in separate terminal
 
-        kubectl -n $NAMESPACE port-forward $(kubectl -n $NAMESPACE get po | awk '/heketi/ {print $1}') 8080:8080
+        export NAMESPACE=gluster-system
+        kubectl -n $NAMESPACE port-forward $(k8s-pod-name.sh -n gluster-system -c heketi) 8080:8080
+
+- Test heketi in the first terminal
+
         curl localhost:8080/hello
 
 - Prepare topology.json
@@ -131,7 +136,7 @@ Based on [https://github.com/heketi/heketi/blob/master/docs/admin/install-kubern
 
 - Wait until job is finished
 
-        kubectl -n $NAMESPACE get jobs
+        kubectl -n $NAMESPACE get jobs --watch
 
 - Delete bootstrap heketi
 
@@ -143,13 +148,13 @@ Based on [https://github.com/heketi/heketi/blob/master/docs/admin/install-kubern
 
 - Optional: Expose via NodePort
 
-        kubectl -n $NAMESPACE get svc heketi -o yaml | sed 's/type:.*$/type: NodePort/g' | kubectl -n $NAMESPACE replace -f -
-        export HEKETI_CLI_SERVER="http://beebox01:$(kubectl -n $NAMESPACE get svc heketi --template='{{(index .spec.ports 0).nodePort}}')"
+        kubectl -n $NAMESPACE get svc heketi -o yaml | sed 's/type:.*$/type: NodePort/g' | \
+        kubectl -n $NAMESPACE replace -f -
+
+        export HEKETI_CLI_SERVER="http://beebox01:$(k8s-nodeport.sh -n $NAMESPACE -e heketi)"
+        echo $HEKETI_CLI_SERVER
         heketi-cli volume list
 
-- Cleanup
-
-        unset NAMESPACE
 
 ## Create Gluster Storage Class
 
@@ -174,6 +179,11 @@ Based on [https://github.com/heketi/heketi/blob/master/docs/admin/install-kubern
 
         kubectl create -f gluster-storageclass.yaml
 
+- Cleanup
+
+        unset NAMESPACE
+
+
 ## Test Persistent Volume Claims
 
 - Create PVC
@@ -184,11 +194,11 @@ Based on [https://github.com/heketi/heketi/blob/master/docs/admin/install-kubern
 - Use PVC for nginx
 
         kubectl apply -f example/nginx.yaml
+        kubectl get po --watch
 
 - Test
 
-        NODE_PORT=$(kubectl get services/nginx -o go-template='{{(index .spec.ports 0).nodePort}}')
-        curl beebox01:$NODE_PORT
+        curl beebox01:$(k8s-nodeport.sh nginx)
 
 - Edit `index.html`
 
@@ -197,16 +207,20 @@ Based on [https://github.com/heketi/heketi/blob/master/docs/admin/install-kubern
         echo 'Hello World from GlusterFS!!!' > index.html
         exit
 
+- Test again (should show the string above)
+
+        curl beebox01:$(k8s-nodeport.sh nginx)
+
 - Destroy nginx
 
         kubectl delete svc nginx
         kubectl delete po nginx-pod1
 
-- Test again
+- Deploy and test again
 
         kubectl apply -f example/nginx.yaml
-        NODE_PORT=$(kubectl get services/nginx -o go-template='{{(index .spec.ports 0).nodePort}}')
-        curl beebox01:$NODE_PORT
+        kubectl get po --watch
+        curl beebox01:$(k8s-nodeport.sh nginx)
 
 - Clean up
 
