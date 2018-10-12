@@ -28,11 +28,11 @@ Developer Machine:
 
 ## Setup Documentation
 
-### Prepare Developer latop and beeboxes
+### Prepare Developer laptop and beeboxes
 
 ==> [docs/0_Preparation.md](docs/0_Preparation.md)
 
-### Install Kubernetes and overlay netowrk
+### Install Kubernetes and overlay network
 
 Kubernetes is set up via `kubeadm` and [canal](https://docs.projectcalico.org/v3.2/getting-started/kubernetes/installation/flannel) was selected as CNI network plugin to provide an overlay network via *flannel* and network policies via *calico*.
 
@@ -50,7 +50,7 @@ The [Helm package manager](https://www.helm.sh/) will be used to install some of
 
 ==> [docs/3_Install_Helm.md](docs/3_Install_Helm.md)
 
-### Install Persistent Storage Provider
+### Install Persistent Storage Provider for *StatefulSets*
 
 The Persistent Storage provider is based on [GlusterFS](https://www.gluster.org/) integrated into Kubernetes via [heketi](https://github.com/heketi/heketi)
 
