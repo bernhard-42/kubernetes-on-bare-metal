@@ -1,4 +1,4 @@
-# Ingress Controller via Voyager 8.0.1
+# Ingress via Voyager 8.0.1
 
 Based on [https://appscode.com/products/voyager/8.0.1/setup/install/](https://appscode.com/products/voyager/8.0.1/setup/install/)
 
@@ -17,9 +17,9 @@ Based on [https://appscode.com/products/voyager/8.0.1/setup/install/](https://ap
 
 - Install voyager
 
-    helm install appscode/voyager --name voyager-operator --version 8.0.1 \
-                                  --namespace voyager-system \
-                                  --set cloudProvider=metallb
+        helm install appscode/voyager --name voyager-operator --version 8.0.1 \
+                                        --namespace voyager-system \
+                                        --set cloudProvider=metallb
 
 ## Test Voyager
         
