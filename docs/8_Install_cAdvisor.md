@@ -64,11 +64,30 @@
                   effect: NoSchedule
         EOF
 
+- Expose cAdvisor on each node on port 9999
+
+        cat <<EOF > overlays/custom/hostport.yaml
+        apiVersion: apps/v1 # for Kubernetes versions before 1.9.0 use apps/v1beta2
+        kind: DaemonSet
+        metadata:
+          name: cadvisor
+        spec:
+          template:
+            spec:
+              containers:
+              - name: cadvisor
+                ports:
+                - name: http
+                  containerPort: 8080
+                  hostPort: 9999
+                  protocol: TCP
+        EOF
+
 - Deploy customized manifest
 
     kustomize build overlay/custom | kubectl apply -f -
 
 ## Open cAdvisor per node
 
-    k82-cadvisor.sh node
+    open http://<node>:9999
 
