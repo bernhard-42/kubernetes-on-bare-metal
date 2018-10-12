@@ -128,4 +128,6 @@ Simple monitoring of each node with [cAdvisor](https://github.com/google/cadviso
 
 ## Cleanup
 
-While VMs can just be rebuilt after a non successful attempt to install kubernetes with all its plugins and helpers, bare metal boxes need to be cleaned. This involves executables, persisted configurations, run time information, iptables rules, network devices, ..., see [Tear down](docs/9_Tear_down.ms).
+While VMs can just be rebuilt after a non successful attempt to install kubernetes with all its plugins and helpers, bare metal boxes need to be cleaned. This involves executables, persisted configurations, run time information, iptables rules, network devices, ... .
+
+==> [docs/9_Tear_down.md](docs/9_Tear_down.md)
