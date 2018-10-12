@@ -6,9 +6,10 @@ The setup was built in order to understand Kubernetes and its ecosystem. It is *
 
 However it allows all Kubernetes features on bare metal including
 
+- Network Policies
 - Persistent Storage Provider
 - Load Balancer
-- Ingress
+- Ingress Controller
 
 to deploy apps as if it would be on a cloud provider.
 
@@ -21,59 +22,19 @@ Cluster
 - Master: beebox01
 - Nodes: beebox02, ..., beebox06
 
-Developer Machine.
+Developer Machine:
 
 - Mac laptop
 
-### Preparation of the Mac
-
-- It is always a good idea to have Homebrew installed ([https://brew.sh/](https://brew.sh/)). Tools like `kubectl`, `helm` and `kustomize` can be easily installed with it.
-- For the tools in `./bin` we need json parser `jq`
-
-        brew install jq
-
-- On the Mac deactivate ipv6 (see [https://www.xgadget.de/anleitung/macos-ipv6-deaktivieren-am-mac/](https://www.xgadget.de/anleitung/macos-ipv6-deaktivieren-am-mac/))
-
-        networksetup -setv6off Ethernet
-        networksetup -setv6off Wi-Fi
-
-    Reason: kubeadm sets kube-proxy `bindAddress` to `0.0.0.0` instead of `::` - and some Macs resolve host names as ipv6 addresses instead of ipv4 addresses
-
-    This can be reactivated after kubernetes tests via 
-
-        networksetup -setv6automatic Wi-Fi 
-        networksetup -setv6automatic Ethernet
-
-    **TODO**: Find a way to change kube-proxy bind address to `::` and test again
-
-### Preparation of the beeboxes
-
-- Kubernetes does not run with swap
-
-        sudo swapoff -a
-
-- Prepare for overlay networks
-
-        sudo sysctl net.bridge.bridge-nf-call-iptables=1
-
-- Prepare for glusterfs
-
-        sudo modprobe dm_thin_pool
-
-- Install docker-ce on all nodes
-
-        sudo apt-get install docker-ce
-
-
 ## Setup Documentation
+
+### Prepare Developer latop and beeboxes
+
+==> [docs/0_Preparation.md](docs/0_Preparation.md)
 
 ### Install Kubernetes and overlay netowrk
 
-Kubernetes is set up via `kubeadm` and [flannel](https://github.com/coreos/flannel) was selected as CNI network plugin (mostly due to simplicity).
-
-Note: Flannel does not support Network Policies
-
-**TODO**: Use [canal]() instead of flannel
+Kubernetes is set up via `kubeadm` and [canal](https://docs.projectcalico.org/v3.2/getting-started/kubernetes/installation/flannel) was selected as CNI network plugin to provide an overlay network via *flannel* and network policies via *calico*.
 
 ==> [docs/1_Install_Kubernetes.md](docs/1_Install_Kubernetes.md)
 
