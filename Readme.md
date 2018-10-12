@@ -28,61 +28,70 @@ Developer Machine:
 
 ## Setup Documentation
 
+To make it easier to see which component belongs to which of the plugins / helpers, the setup uses namespaces.
+
 ### Prepare Developer laptop and beeboxes
 
 ==> [docs/0_Preparation.md](docs/0_Preparation.md)
 
 ### Install Kubernetes and overlay network
 
-Kubernetes is set up via `kubeadm` and [canal](https://docs.projectcalico.org/v3.2/getting-started/kubernetes/installation/flannel) was selected as CNI network plugin to provide an overlay network via *flannel* and network policies via *calico*.
+- Kubernetes is set up via `kubeadm` and [canal](https://docs.projectcalico.org/v3.2/getting-started/kubernetes/installation/flannel) was selected as CNI network plugin to provide an overlay network via *flannel* and network policies via *calico*.
+- Namespace: `kube-system`
 
 ==> [docs/1_Install_Kubernetes.md](docs/1_Install_Kubernetes.md)
 
 ### Install Kubernetes Dashboard
 
-The [Kubernetes Dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/) helps especially at the beginning to get an overview of what is deployed and where
+- The [Kubernetes Dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/) helps especially at the beginning to get an overview of what is deployed and where
+- Namespace: `kube-system`
 
 ==> [docs/2_Install_Kubernetes_Dashboard.md](docs/2_Install_Kubernetes_Dashboard.md)
     
 ### Install Helm Package Manager
     
-The [Helm package manager](https://www.helm.sh/) will be used to install some of the plugins and helpers
+- The [Helm package manager](https://www.helm.sh/) will be used to install some of the plugins and helpers
+- Namespace: `kube-system`
 
 ==> [docs/3_Install_Helm.md](docs/3_Install_Helm.md)
 
 ### Install Persistent Storage Provider for *StatefulSets*
 
-The Persistent Storage provider is based on [GlusterFS](https://www.gluster.org/) integrated into Kubernetes via [heketi](https://github.com/heketi/heketi)
+- The Persistent Storage provider is based on [GlusterFS](https://www.gluster.org/) integrated into Kubernetes via [heketi](https://github.com/heketi/heketi)
+- Namespace: `gluster-system`
 
 ==> [docs/4_Install_Storage_Provider.md](docs/4_Install_Storage_Provider.md)
 
 ### Install a Load Balancer
 
-The Load Balancer for kubernetes uses [metallb](https://metallb.universe.tf/) in Layer 2 mode. A range of IP addresses in the own subnet are required.
+- The Load Balancer for kubernetes uses [metallb](https://metallb.universe.tf/) in Layer 2 mode. A range of IP addresses in the own subnet are required.
+- Namespace: `metallb-system`
 
 ==> [docs/5_Install_Load_Balancer.md](docs/5_Install_Load_Balancer.md)
 
-### Install an Ingress Controller
+### Install an Ingresses
 
-[Voyager](https://appscode.com/products/voyager/) was selected as Ingress Controller. There is a great overview in [https://kubedex.com/nginx-ingress-vs-kong-vs-traefik-vs-haproxy-vs-voyager-vs-contour-vs-ambassador/](https://kubedex.com/nginx-ingress-vs-kong-vs-traefik-vs-haproxy-vs-voyager-vs-contour-vs-ambassador/) as a starting point.
-
-While [Envoy](https://github.com/envoyproxy/envoy) is cool and as such all Envoy based ingress controllers (e.g. *ambassador*, *Countour*), Voyager is built on the battle proven [HAProxy](http://www.haproxy.org/), also supports dynamic discovery and supports out of the box *metallb* as load balancer. The latter made it a good choice because of using *metallb*.
-
-Note, since Voyager uses CRDs the Voyager Ingress Controller are not shown in Kubernetes Dashboard.
+- [Voyager](https://appscode.com/products/voyager/) was selected as Ingress Controller. There is a great overview in [https://kubedex.com/nginx-ingress-vs-kong-vs-traefik-vs-haproxy-vs-voyager-vs-contour-vs-ambassador/](https://kubedex.com/nginx-ingress-vs-kong-vs-traefik-vs-haproxy-vs-voyager-vs-contour-vs-ambassador/) as a starting point.
+- While [Envoy](https://github.com/envoyproxy/envoy) is cool and as such all Envoy based ingress controllers (e.g. *ambassador*, *Countour*), Voyager is built on the battle proven [HAProxy](http://www.haproxy.org/), also supports dynamic discovery and supports out of the box *metallb* as load balancer. The latter made it a good choice because of using *metallb*.
+- Namespace: `voyager-system`
 
 ==> [docs/6_Install_Ingress_controller.md](docs/6_Install_Ingress_controller.md)
 
+Note, since Voyager uses CRDs the Voyager Ingresses are not shown in Kubernetes Dashboard.
+
+
 ### Install the Docker Registry
 
-The aim is to build docker containers on the Mac laptop with docker for Mac, push them to the private registry and deploy then afterwards with kubernetes.
-
-The easiest way here was to use the private [Docker registry](https://docs.docker.com/registry/). 
+- The aim is to build docker containers on the Mac laptop with docker for Mac, push them to the private registry and deploy then afterwards with kubernetes.
+- The easiest way here was to use the private [Docker registry](https://docs.docker.com/registry/). 
+- Namespace: `registry-system`
 
 ==> [docs/7_Install_Registry.md](docs/7_Install_Registry.md)
 
 ### Install Simple Container Monitoring
 
-Simple monitoring of each node with [cAdvisor](https://github.com/google/cadvisor).
+- Simple monitoring of each node with [cAdvisor](https://github.com/google/cadvisor).
+- Namespace: `cadvisor`
 
 ==> [docs/8_Install_cAdvisor.md](docs/8_Install_cAdvisor.md).
 
