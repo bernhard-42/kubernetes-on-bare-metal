@@ -1,0 +1,18 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: test-app
+  labels:
+    app: test-app
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /web
+        backend:
+          serviceName: web
+          servicePort: 80
+      - path: /api
+        backend:
+          serviceName: rest
+          servicePort: 80

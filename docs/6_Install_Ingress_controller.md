@@ -1,47 +1,102 @@
-# Ingress via Voyager 8.0.1
+# Ingress via Heptio Contour
 
-Based on [https://appscode.com/products/voyager/8.0.1/setup/install/](https://appscode.com/products/voyager/8.0.1/setup/install/)
+Based on: [https://github.com/heptio/contour](https://github.com/heptio/contour)
 
-## Install Voyager
+## Installation
 
-- Ceate namespace
+The installation is adapted be compliant with the `*-system` namespace convention for system plugins / helpers in this kubernetes cluster.
 
-        cd ingress
-        kubectl create ns voyager-system
+- Get deployment manifest and remove namespace defintion (gsed is GNU version of sed. Use `sed` on linux, and on Mac install via `brew`)
 
-- Add Voyager helm repo
+        curl -sL  https://j.hept.io/contour-deployment-rbac | gsed -e '/^kind.*Namespace/,+4d' > contour-deployment-rbac.yaml
 
-        helm repo add appscode https://charts.appscode.com/stable/
-        helm repo update
-        helm search appscode/voyager
+- Create patches to add namespace again
 
-- Install voyager
+        cat <<EOF > namespace.yaml
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+        name: contour-system
+        EOF
 
-        helm install appscode/voyager --name voyager-operator --version 8.0.1 \
-                                        --namespace voyager-system \
-                                        --set cloudProvider=metallb
+        cat <<EOF > kustomization.yaml
+        namespace: contour-system
+        resources:
+        - namespace.yaml
+        - contour-deployment-rbac.yaml
+        EOF
 
-## Test Voyager
+- Install patched `contour`
 
-- Deploy test artefacts
+        kustomize build . | kubectl apply -f -
 
-        BASE_URL="https://raw.githubusercontent.com/appscode/voyager/8.0.1/docs/examples"
-        curl -fsSL $BASE_URL/ingress/types/loadbalancer/deploy-servers.sh | bash
-        kubectl apply -f $BASE_URL/ingress/types/loadbalancer/ing.yaml
+- Get Load Balancer external IP
 
-        kubectl get pods,svc
+        k8s-lb.sh -n contour-system contour
+        # 192.168.124.231
+
+
+## Test
+
+- Deploy test artefacts (based on the [voyager example](https://github.com/appscode/voyager/tree/master/docs/examples/ingress/types/loadbalancer))
+
+        kubectl run nginx --image=nginx
+        kubectl expose deployment nginx --name=web --port=80 --target-port=80
+
+        kubectl run echoserver --image=gcr.io/google_containers/echoserver:1.4
+        kubectl expose deployment echoserver --name=rest --port=80 --target-port=8080
+
+        kubectl get pods --watch
+        kubectl get svc
+
         kubectl get ingress.voyager.appscode.com  # fully qualified !
+
+- Define an ingress manifest
+
+        cat <<EOF > ingress.yaml
+        apiVersion: extensions/v1beta1
+        kind: Ingress
+        metadata:
+          name: test-app
+          labels:
+            app: test-app
+        spec:
+          rules:
+          - http:
+              paths:
+              - path: /web
+                backend:
+                  serviceName: web
+                  servicePort: 80
+              - path: /api
+                backend:
+                  serviceName: rest
+                  servicePort: 80
+        EOF
+
+- Deploy
+
+        kubectl apply -f ingress.yaml
+
 
 - Call web endpoint
 
-        curl $(k8s-lb.sh -c voyager-test-ingress)  -H "Host: web.example.com"
+        curl $(k8s-lb.sh -n contour-system contour)/web
 
 - Call rest endpoint
 
-        curl $(k8s-lb.sh -c voyager-test-ingress)  -H "Host: app.example.com"
+        curl $(k8s-lb.sh -n contour-system contour)/api
 
 - Clean up
 
-        for s in voyager-test-ingress web rest; do kubectl delete svc $s; done
-        for d in echoserver nginx voyager-test-ingress; do kubectl delete deploy $d; done
-        kubectl delete ingress.voyager.appscode.com test-ingress
+        for s in web rest; do kubectl delete svc $s; done
+        for d in echoserver nginx; do kubectl delete deploy $d; done
+        kubectl delete ingress test-app
+
+
+## Remove Contour
+
+    kubectl delete ns contour-system
+    kubectl delete clusterrole contour
+    kubectl delete clusterrolebinding contour
+    kubectl delete crd ingressroutes.contour.heptio.com

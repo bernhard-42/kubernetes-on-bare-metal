@@ -1,0 +1,4 @@
+namespace: contour-system
+resources:
+- namespace.yaml
+- contour-deployment-rbac.yaml

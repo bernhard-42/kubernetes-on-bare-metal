@@ -73,9 +73,10 @@ To make it easier to see which component belongs to which of the plugins / helpe
 
 ### Install an Ingresses
 
-- [Voyager](https://appscode.com/products/voyager/) was selected as Ingress Controller. There is a great overview in [https://kubedex.com/nginx-ingress-vs-kong-vs-traefik-vs-haproxy-vs-voyager-vs-contour-vs-ambassador/](https://kubedex.com/nginx-ingress-vs-kong-vs-traefik-vs-haproxy-vs-voyager-vs-contour-vs-ambassador/) as a starting point.
-- While [Envoy](https://github.com/envoyproxy/envoy) is cool and as such all Envoy based ingress controllers (e.g. *ambassador*, *Countour*), Voyager is built on the battle proven [HAProxy](http://www.haproxy.org/), also supports dynamic discovery and supports out of the box *metallb* as load balancer. The latter made it a good choice because of using *metallb*.
-- Namespace: `voyager-system`
+- There is a great overview in [https://kubedex.com/nginx-ingress-vs-kong-vs-traefik-vs-haproxy-vs-voyager-vs-contour-vs-ambassador/](https://kubedex.com/nginx-ingress-vs-kong-vs-traefik-vs-haproxy-vs-voyager-vs-contour-vs-ambassador/) as a starting point.
+- Moved away from [Voyager](https://appscode.com/products/voyager/) since it does not support the Kubernetes Ingress Object. This might break ootb helm charts that use Ingress.
+- [Heptio Contour](https://github.com/heptio/contour) is used as Ingress Controller, supporting both Ingress Object and an own IngressRoute API
+- Namespace: `heptio-contour`
 
 ==> [docs/6_Install_Ingress_controller.md](docs/6_Install_Ingress_controller.md)
 
