@@ -71,7 +71,7 @@ To make it easier to see which component belongs to which of the plugins / helpe
 
 ==> [docs/5_Install_Load_Balancer.md](docs/5_Install_Load_Balancer.md)
 
-### Install an Ingresses
+### Install an Ingress Controller
 
 - There is a great overview in [https://kubedex.com/nginx-ingress-vs-kong-vs-traefik-vs-haproxy-vs-voyager-vs-contour-vs-ambassador/](https://kubedex.com/nginx-ingress-vs-kong-vs-traefik-vs-haproxy-vs-voyager-vs-contour-vs-ambassador/) as a starting point.
 - Moved away from [Voyager](https://appscode.com/products/voyager/) since it does not support the Kubernetes Ingress Object. This might break ootb helm charts that use Ingress.
@@ -79,8 +79,6 @@ To make it easier to see which component belongs to which of the plugins / helpe
 - Namespace: `heptio-contour`
 
 ==> [docs/6_Install_Ingress_controller.md](docs/6_Install_Ingress_controller.md)
-
-Note: Since Voyager uses CRDs, the Voyager Ingresses are not shown in Kubernetes Dashboard.
 
 
 ### Install the Docker Registry
