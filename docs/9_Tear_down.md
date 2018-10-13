@@ -6,9 +6,9 @@ Note: In order to be able to completely reset iptables, docker will also be unin
 
 - Drain and delete all nodes
 
-        for i in $(seq 1 6); do 
-            kubectl drain beebox0$i --delete-local-data --force --ignore-daemonsets; 
-            kubectl delete node beebox0$i; 
+        for i in $(seq 1 6); do
+            kubectl drain beebox0$i --delete-local-data --force --ignore-daemonsets;
+            kubectl delete node beebox0$i;
         done
 
 - Clean up etcd on the master
@@ -61,10 +61,10 @@ Note: In order to be able to completely reset iptables, docker will also be unin
 - Remove network devices
 
     Source: [https://stackoverflow.com/questions/46276796/kubenetes-cannot-cleanup-flannel/](https://stackoverflow.com/questions/46276796/kubenetes-cannot-cleanup-flannel/)
-    
-        for i in cni0 docker0; do 
-            ifconfig $i down; 
-            brctl delbr $i; 
+
+        for i in cni0 docker0; do
+            ifconfig $i down;
+            brctl delbr $i;
         done
         ifconfig flannel.1 down
         ip link delete flannel.1

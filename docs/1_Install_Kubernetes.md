@@ -1,10 +1,10 @@
 # Kubernetes
 
+Based on [https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/)
+
 ## Install kubernetes executables on each node
 
 - Install kubernetes executables (as root)
-
-    Note: For the time being (Oct 2018) use v1.11.3 instead of v1.12.x to avoid issues with flannel
 
         sudo -i
 
@@ -14,7 +14,6 @@
         EOF
         apt-get update
         apt-get install -y kubelet kubeadm kubectl
-        # apt-get install -y kubelet=1.11.3-00 kubeadm=1.11.3-00 kubectl=1.11.3-00
         apt-mark hold kubelet kubeadm kubectl
 
 - Optional: Load all kubernetes images
@@ -24,9 +23,11 @@
 
 ## Initialize kubernetes cluster on the admin node
 
-- Initialize cluster (as root with cidr range for Flannel and Canal)
-    
+- Initialize the cluster (as root with cidr range for Flannel and Canal)
+
         kubeadm init --pod-network-cidr=10.244.0.0/16
+
+    Take note of the `kubeadm join` command line in the output.
 
 - Configure access for root (and non root) user
 
@@ -38,7 +39,7 @@
 
 ## Install network plugin flannel
 
-- Install canal on admin node
+- Install canal on master node
 
     This provides an CNI overlay network by `flannel` and network policies by `calico`
 
@@ -46,13 +47,9 @@
         kubectl apply -f $BASE_URL/installation/hosted/canal/rbac.yaml
         kubectl apply -f $BASE_URL/installation/hosted/canal/canal.yaml
 
-    Note: For a "flannel only" deployment use the master version from github (until 0.11): 
-    
-        kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-
 - Test kubernetes installation and check that `coredns` gets successfully instantiated
 
-        kubectl get po --all-namespaces
+        kubectl get po --all-namespaces --watch
 
 
 ## Join nodes
@@ -66,26 +63,34 @@
 
 - Check that all nodes are running
 
-    kubectl get nodes --watch
+        kubectl get nodes --watch
 
 
 ## Enable remote control
 
-- On the local laptop 
+- Install `kubectl` on the local laptop
+
+        brew install kubernetes-cli
 
         scp root@beebox01:/etc/kubernetes/admin.conf .
         rm -fr ~/.kube
         mkdir -p ~/.kube
         mv admin.conf ~/.kube/config
 
-Note: From now on it is expected that kubectl commands get issued from the laptop (for remote kubernets cluster)
+- Enable the `k8s-*` helpers of this repository:
+
+        PATH=$PATH:$(pwd)/bin
+
+    from the top folder of this repository
+
+Note: From now on it is expected that `kubectl` commands get issued from the laptop (adminitrating the remote kubernets cluster).
 
 
 ## Test kubernetes and networking
 
 - Install kubernetes tutorial bootcamp app
 
-        for i in 0 1; do 
+        for i in 0 1; do
             kubectl run kubernetes-bootcamp$i --image=gcr.io/google-samples/kubernetes-bootcamp:v1 --port=8080
         done
         kubectl get po --watch
@@ -94,12 +99,12 @@ Note: From now on it is expected that kubectl commands get issued from the lapto
 
         kubectl proxy
 
-- Test installed app via local proxy (ensure to have ./bin in the PATH to access the local k82 helpers)
+- Test installed app via local proxy
 
         for i in 0 1; do
             curl http://localhost:8001/api/v1/namespaces/default/pods/$(k8s-pod-name.sh -c bootcamp$i)/proxy/
         done
-    
+
 - Expose app
 
         for i in 0 1; do
@@ -114,7 +119,7 @@ Note: From now on it is expected that kubectl commands get issued from the lapto
             curl http://localhost:8001/api/v1/namespaces/default/services/http:kubernetes-bootcamp$i:/proxy/
         done
 
-- Test installed app via NodePort
+- Test installed app via NodePort (this uses one of the local `k8s-*` helpers)
 
         for i in 0 1; do
             curl -v beebox01:$(k8s-nodeport.sh -e bootcamp$i)
@@ -122,17 +127,17 @@ Note: From now on it is expected that kubectl commands get issued from the lapto
 
 - Test of DNS and cross container networking
 
-    Enter pod kubernetes-bootcamp0
+    - Enter pod kubernetes-bootcamp0
 
-        k8s-exec.sh -c bootcamp0
+            k8s-exec.sh -c bootcamp0
 
-        Executing 'sh' on pod 'kubernetes-bootcamp0-7775b6ccc7-lpx5h' (1)
-        # 
+            Executing 'sh' on pod 'kubernetes-bootcamp0-7775b6ccc7-lpx5h' (1)
+            #
 
-    Curl the other pod kubernetes-bootcamp1
+    - Curl the other pod kubernetes-bootcamp1 via the DNS name of the service
 
-        curl kubernetes-bootcamp1.default.svc.cluster.local:8080
-        exit
+            curl kubernetes-bootcamp1.default.svc.cluster.local:8080
+            exit
 
 - Cleanup
 

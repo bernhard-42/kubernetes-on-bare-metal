@@ -1,14 +1,21 @@
-# Persistent Storage Provider via Glusterfs and Heketi 8.0.0 
+# Persistent Storage Provider via Glusterfs and Heketi 8.0.0
 
 Based on [https://github.com/heketi/heketi/blob/master/docs/admin/install-kubernetes.md](https://github.com/heketi/heketi/blob/master/docs/admin/install-kubernetes.md)
 
 ## Prepare file based devices
 
+To provide gluster with a device on each machine, create a "large enough" file
+
     sudo fallocate -l 50G /opt/sdv1.store
-    sudo mknod /dev/fake-sdv1 b 7 200            # 200 should be high enough for a free loop### device
+
+and define a block device with it (note, the third parameter, 200, should be high enough for a free `/dev/loop*` device)
+
+    sudo mknod /dev/fake-sdv1 b 7 200
     sudo losetup /dev/fake-sdv1 /opt/sdv1.store
 
 ## 4.2 Install heketi-cli
+
+Heketi client needs to be the same version as on the kubernetes cluster
 
     wget https://github.com/heketi/heketi/releases/download/v8.0.0/heketi-client-v8.0.0.darwin.amd64.tar.gz
     tar -ztvf heketi-client-v8.0.0.darwin.amd64.tar.gz
@@ -24,16 +31,18 @@ Based on [https://github.com/heketi/heketi/blob/master/docs/admin/install-kubern
         git checkout tags/v8.0.0 -b v8.0.0
         cd ..
 
+- Copy files that need to be edited
+
         cp heketi/extras/kubernetes/heketi.json .
         cp heketi/extras/kubernetes/topology-sample.json topology.json
 
-- Set Gluster namesapce
-        
+- Create Gluster namesapce
+
         export NAMESPACE=gluster-system
         kubectl create ns $NAMESPACE
 
-- Install Glusterfs 
-        
+- Install Glusterfs
+
         kubectl -n $NAMESPACE create -f heketi/extras/kubernetes/glusterfs-daemonset.json
         kubectl label node beebox02 beebox03 beebox04 beebox05 beebox06 storagenode=glusterfs
 
@@ -127,6 +136,8 @@ Based on [https://github.com/heketi/heketi/blob/master/docs/admin/install-kubern
           ]
         }
 
+- Create the glusterfs topology
+
         heketi-cli topology load --json=topology.json
 
 - Set up a volume for heketi in glusterfs
@@ -144,7 +155,7 @@ Based on [https://github.com/heketi/heketi/blob/master/docs/admin/install-kubern
 
 - Create final heketi
 
-        kubectl -n $NAMESPACE create -f heketi/extras/kubernetes/heketi-deployment.json 
+        kubectl -n $NAMESPACE create -f heketi/extras/kubernetes/heketi-deployment.json
 
 - Optional: Expose via NodePort
 
@@ -161,7 +172,7 @@ Based on [https://github.com/heketi/heketi/blob/master/docs/admin/install-kubern
 - Define a storage class
 
         cat gluster-storageclass.yaml
-        
+
         apiVersion: storage.k8s.io/v1beta1
         kind: StorageClass
         metadata:
@@ -171,7 +182,7 @@ Based on [https://github.com/heketi/heketi/blob/master/docs/admin/install-kubern
           resturl: "http://10.105.71.42:8080"
           restuser: "admin"
           restuserkey: "sercret123"
-     
+
     - For the `resturl` take the service's cluster IP: `kubectl -n gluster-system get svc heketi --template '{{.spec.clusterIP}}'`
     - For `restuser` and `restuserkey` refer back to `heketi.json`
 
@@ -227,4 +238,4 @@ Based on [https://github.com/heketi/heketi/blob/master/docs/admin/install-kubern
         kubectl delete svc nginx
         kubectl delete po nginx-pod1
         kubectl delete pvc gluster1
-        
+

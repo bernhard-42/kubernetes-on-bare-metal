@@ -3,6 +3,8 @@
 
 ## Install kustomize
 
+On the dev laptop
+
     brew install kustomize
 
 ## Install cAdvisor
@@ -87,13 +89,13 @@
 
 - Deploy customized manifest
     - Create the namespace set in `kustomization.yaml`
-       
+
              kubectl create ns cadvisor-system
-    
-    - Insall customized template into `cadvisor-system`
+
+    - Install customized template into `cadvisor-system`
 
             kustomize build overlays/custom | kubectl apply -f -
-            
+
     - Delete the obsolete namespace create by the standard manifest
 
             kubectl delete ns cadvisor

@@ -22,7 +22,7 @@ Based on [https://appscode.com/products/voyager/8.0.1/setup/install/](https://ap
                                         --set cloudProvider=metallb
 
 ## Test Voyager
-        
+
 - Deploy test artefacts
 
         BASE_URL="https://raw.githubusercontent.com/appscode/voyager/8.0.1/docs/examples"

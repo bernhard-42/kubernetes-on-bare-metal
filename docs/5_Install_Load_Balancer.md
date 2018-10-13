@@ -2,25 +2,29 @@
 
 Based on [https://metallb.universe.tf/tutorial/layer2/](https://metallb.universe.tf/tutorial/layer2/)
 
-## Get `metallb` repo
+## Install metallb
 
-    cd metallb
-    git clone https://github.com/google/metallb.git
-    cd metallb/
-    git checkout tags/v0.7.3 -b v0.7.3
-    cd ..
+- Clone the metallb repository
 
-    cp metallb/manifests/example-layer2-config.yaml layer2-config.yaml
+        cd metallb
+        git clone https://github.com/google/metallb.git
+        cd metallb/
+        git checkout tags/v0.7.3 -b v0.7.3
+        cd ..
 
-## Install MetalLB 
+- Copy the file that needs to edited
 
-    kubectl apply -f metallb/manifests/metallb.yaml
+        cp metallb/manifests/example-layer2-config.yaml layer2-config.yaml
 
-## Configure IP range
+- Install MetalLB
 
-Edit IP ranges in `layer2-config.yaml` and apply
-        
-    kubectl apply -f layer2-config.yaml
+       kubectl apply -f metallb/manifests/metallb.yaml
+
+- Configure IP range
+
+    Edit IP ranges in `layer2-config.yaml` and apply
+
+        kubectl apply -f layer2-config.yaml
 
 ## Test LoadBalancer
 

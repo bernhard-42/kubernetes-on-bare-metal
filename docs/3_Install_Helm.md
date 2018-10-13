@@ -8,3 +8,15 @@
 
         brew install kubernetes-helm
         helm init --service-account tiller
+
+## Test helm
+
+- Install e.g. tomcat
+
+        helm install --name my-release stable/tomcat
+        kubectl get po --watch
+        helm list
+
+- Clean up
+
+        helm delete --purge my-release
