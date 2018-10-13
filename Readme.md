@@ -76,7 +76,7 @@ To make it easier to see which component belongs to which of the plugins / helpe
 - There is a great overview in [https://kubedex.com/nginx-ingress-vs-kong-vs-traefik-vs-haproxy-vs-voyager-vs-contour-vs-ambassador/](https://kubedex.com/nginx-ingress-vs-kong-vs-traefik-vs-haproxy-vs-voyager-vs-contour-vs-ambassador/) as a starting point.
 - Moved away from [Voyager](https://appscode.com/products/voyager/) since it does not support the Kubernetes Ingress Object. This might break ootb helm charts that use Ingress.
 - [Heptio Contour](https://github.com/heptio/contour) is used as Ingress Controller, supporting both Ingress Object and an own IngressRoute API
-- Namespace: `heptio-contour`
+- Namespace: `contour-system`
 
 ==> [docs/6_Install_Ingress_controller.md](docs/6_Install_Ingress_controller.md)
 
