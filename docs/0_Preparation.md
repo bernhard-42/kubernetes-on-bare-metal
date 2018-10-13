@@ -7,6 +7,10 @@
 
         brew install jq
 
+- For some indtallations `kustomize` is needed
+
+        brew install kustomize
+
 - On the Mac deactivate ipv6 (see [https://www.xgadget.de/anleitung/macos-ipv6-deaktivieren-am-mac/](https://www.xgadget.de/anleitung/macos-ipv6-deaktivieren-am-mac/))
 
         networksetup -setv6off Ethernet
