@@ -1,41 +1,32 @@
 
 # Install cAdvisor as Daemonset
 
-## Install kustomize
-
-On the dev laptop
-
-    brew install kustomize
-
 ## Install cAdvisor
 
     mkdir cAdvisor
     cd cAdvisor/
     git clone https://github.com/google/cadvisor.git
-    cd cadvisor/deploy/kubernetes/
+    
 
 ## Deploy customized cAdvisor
 
 - Prepare customization
 
-        mkdir overlays/custom
+        cp cadvisor/deploy/kubernetes/base/daemonset.yaml .
 
-- Define the two customization files
+- Define the namespace manifest
 
-        cat <<EOF > overlays/custom/kustomization.yaml
-        namespace: cadvisor-system
-        bases:
-        - ../../base
-        patches:
-        - schedule-master.yaml
-        - cadvisor-args.yaml
-        - hostport.yaml
+        cat <<EOF > namespace.yaml
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: cadvisor-system
         EOF
 
 - Add some parameters to cAdvisor to reduce load on local kube proxy
 
-        cat <<EOF > overlays/custom/cadvisor-args.yaml
-        apiVersion: apps/v1 # for Kubernetes versions before 1.9.0 use apps/v1beta2
+        cat <<EOF > cadvisor-args.yaml
+        apiVersion: apps/v1
         kind: DaemonSet
         metadata:
           name: cadvisor
@@ -49,14 +40,14 @@ On the dev laptop
                   - --max_housekeeping_interval=10s
                   - --event_storage_event_limit=default=0
                   - --event_storage_age_limit=default=0
-                  - --disable_metrics=tcp,udp                # enable only diskIO, cpu, memory, network
-                  - --docker_only=true                       # only show stats for docker containers
+                  - --disable_metrics=tcp,udp
+                  - --docker_only=true
         EOF
 
 - Allow deployment on master node
 
-        cat <<EOF > overlays/custom/schedule-master.yaml
-        apiVersion: apps/v1 # for Kubernetes versions before 1.9.0 use apps/v1beta2
+        cat <<EOF >schedule-master.yaml
+        apiVersion: apps/v1
         kind: DaemonSet
         metadata:
           name: cadvisor
@@ -68,10 +59,11 @@ On the dev laptop
                   effect: NoSchedule
         EOF
 
+
 - Expose cAdvisor on each node on port 9999
 
-        cat <<EOF > overlays/custom/hostport.yaml
-        apiVersion: apps/v1 # for Kubernetes versions before 1.9.0 use apps/v1beta2
+        cat <<EOF > hostport.yaml
+        apiVersion: apps/v1
         kind: DaemonSet
         metadata:
           name: cadvisor
@@ -87,22 +79,25 @@ On the dev laptop
                   protocol: TCP
         EOF
 
+- Define the customization file
+
+        cat <<EOF > kustomization.yaml
+        namespace: cadvisor-system
+        commonLabels:
+          app: cadvisor
+        resources:
+        - daemonset.yaml
+        - namespace.yaml
+        patches:
+        - schedule-master.yaml
+        - cadvisor-args.yaml
+        - hostport.yaml
+        EOF
+
 - Deploy customized manifest
-    - Create the namespace set in `kustomization.yaml`
 
-             kubectl create ns cadvisor-system
+        kustomize build . | kubectl apply -f -
 
-    - Install customized template into `cadvisor-system`
-
-            kustomize build overlays/custom | kubectl apply -f -
-
-    - Delete the obsolete namespace create by the standard manifest
-
-            kubectl delete ns cadvisor
-
-    - Wait until deployed
-
-            kubectl -n cadvisor-system get po -o wide --watch
 
 ## Open cAdvisor per node
 

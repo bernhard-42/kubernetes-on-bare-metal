@@ -1,0 +1,10 @@
+namespace: cadvisor-system
+commonLabels:
+  app: cadvisor
+resources:
+- daemonset.yaml
+- namespace.yaml
+patches:
+- schedule-master.yaml
+- cadvisor-args.yaml
+- hostport.yaml
