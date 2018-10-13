@@ -8,7 +8,8 @@ The installation is adapted be compliant with the `*-system` namespace conventio
 
 - Get deployment manifest and remove namespace defintion (gsed is GNU version of sed. Use `sed` on linux, and on Mac install via `brew`)
 
-        curl -sL  https://j.hept.io/contour-deployment-rbac | gsed -e '/^kind.*Namespace/,+4d' > contour-deployment-rbac.yaml
+        curl -sL  https://j.hept.io/contour-deployment-rbac | \
+        gsed -e '/^kind.*Namespace/,+4d' > contour-deployment-rbac.yaml
 
 - Create patches to add namespace again
 
@@ -79,18 +80,35 @@ The installation is adapted be compliant with the `*-system` namespace conventio
         kubectl apply -f ingress.yaml
 
 
-- Call web endpoint
+- Call `web` endpoint and get nginx 404
 
         curl $(k8s-lb.sh -n contour-system contour)/web
 
-- Call rest endpoint
+        # <html>
+        # <head><title>404 Not Found</title></head>
+        # <body>
+        # <center><h1>404 Not Found</h1></center>
+        # <hr><center>nginx/1.15.5</center>
+        # </body>
+        # </html>
+
+- Call `rest` endpoint
 
         curl $(k8s-lb.sh -n contour-system contour)/api
 
+        # LIENT VALUES:
+        # client_address=10.244.5.13
+        # command=GET
+        # real path=/api
+        # query=nil
+        # request_version=1.1
+        # request_uri=http://192.168.124.231:8080/api
+        # ...
+
 - Clean up
 
-        for s in web rest; do kubectl delete svc $s; done
-        for d in echoserver nginx; do kubectl delete deploy $d; done
+        kubectl delete svc web rest
+        kubectl delete deploy echoserver nginx
         kubectl delete ingress test-app
 
 
