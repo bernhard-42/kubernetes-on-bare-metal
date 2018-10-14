@@ -4,3 +4,4 @@ gluster/heketi-client
 gluster/heketi
 gluster/heketi-storage.json
 cAdvisor/cadvisor/
+ceph/rook/
