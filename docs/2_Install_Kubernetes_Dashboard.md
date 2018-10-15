@@ -22,3 +22,5 @@
 - Dashboard browser URL:
 
     http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/cluster
+
+[<== Install Kubernetes](./1_Install_Kubernetes.md) | [Install Helm  ==>](./3_Install_Helm.md)

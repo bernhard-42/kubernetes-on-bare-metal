@@ -20,3 +20,5 @@
 - Clean up
 
         helm delete --purge my-release
+
+[<== Install Kubernetes Dashboard](./2_Install_Kubernetes_Dashboard.md) | [Install Storage Provider ==>](./4_Install_Storage_Provider.md)

@@ -100,3 +100,6 @@ On all nodes add '{ "insecure-registries" : [ "192.168.124.230:5000" ] }' to `/e
     - Clean up
 
             kubectl delete po alpine-enhanced
+
+
+[<== Install Ingress controller](./6_Install_Ingress_controller.md) | [Install cAdvisor ==>](./8_Install_cAdvisor.md)

@@ -239,4 +239,5 @@ Heketi client needs to be the same version as on the kubernetes cluster
         kubectl delete po nginx-pod1
         kubectl delete pvc gluster1
 
+[<== Install Helm](./3_Install_Helm.md) | [Install Load Balancer ==>](./5_Install_Load_Balancer.md)
 

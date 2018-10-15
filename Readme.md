@@ -16,7 +16,7 @@ and to deploy apps as if it would be kubernetes on a cloud provider.
 
 ## Machine Setup
 
-The cluster is built on 6 machines (6 x *ASRock beebox* boxes with 16 GB memory and 4 cores running Ubuntu 16.04). The beeboxes are nice playgroud machines due to their silence and low power consumption while providing sufficient computing power especially for efficient apps and frameworks like Kubernetes (e.g. the java based hadoop framework did not run too well)
+The cluster is built on 6 machines (6 x *ASRock beebox* boxes with 16 GB memory and 4 cores running Ubuntu 16.04). The beeboxes are nice playgroud machines due to their silence and low power consumption while providing sufficient computing power especially for efficient apps and frameworks like Kubernetes (e.g. the java based hadoop framework did not run too well). 
 
 Cluster
 
@@ -31,25 +31,6 @@ Developer Machine:
 
 To make it easier to see which component belongs to which of the plugins / helpers, the setup uses namespaces.
 
-|                 |                     | beebox01                | beebox02   | beebox03             | beebox04      | beebox05        | beebox06   |
-|-----------------|---------------------|-------------------------|------------|----------------------|---------------|-----------------|------------|
-| **namespace**   | **tool**            |                         |            |                      |               |                 |            |
-| kube-system     | k8s                 | etcd                    |            |                      |               |                 |            |
-|                 | k8s (control plane) | kube-apiserver          |            |                      |               |                 |            |
-|                 | k8s (control plane) | kube-controller-manager |            |                      |               |                 |            |
-|                 | k8s (control plane) | kube-scheduler          |            |                      |               |                 |            |
-|                 | k8s (DNS)           | coredns                 |            |                      |               |                 |            |
-|                 | k8s                 | kube-proxy              | kube-proxy | kube-proxy           | kube-proxy    | kube-proxy      | kube-proxy |
-|                 | canal (CNI)         | canal                   | canal      | canal                | canal         | canal           | canal      |
-|                 | k8s-dashboard       |                         |            | kubernetes-dashboard |               |                 |            |
-|                 | helm                |                         |            |                      | tiller-deploy |                 |            |
-| metallb-system  | metallb             |                         | speaker    | speaker              | speaker       | speaker         | speaker    |
-|                 | metallb             |                         |            |                      | controller    |                 |            |
-| contour-system  | contour             |                         | contour    |                      | contour       |                 |            |
-| gluster-system  | gluserfs            |                         | glusterfs  | glusterfs            | glusterfs     | glusterfs       | glusterfs  |
-|                 | heketi              |                         | heketi     |                      |               |                 |            |
-| registry-system | docker-registry     |                         |            |                      |               | registry-docker |            |
-| cadvisor-system | cadvisor            | cadvisor                | cadvisor   | cadvisor             | cadvisor      | cadvisor        | cadvisor   |
 ### Prepare Developer laptop and beeboxes
 
 ==> [docs/0_Preparation.md](docs/0_Preparation.md)
@@ -117,8 +98,34 @@ To make it easier to see which component belongs to which of the plugins / helpe
 
 Note: This is also an example of using [kustomize](https://kustomize.io/) to adapt manifests with changing the original files.
 
+## Result
+
+The installation procedure creates for example the following pod setup:
+
+|                 |                     | beebox01                | beebox02   | beebox03             | beebox04      | beebox05        | beebox06   |
+|-----------------|---------------------|-------------------------|------------|----------------------|---------------|-----------------|------------|
+| **namespace**   | **tool**            |                         |            |                      |               |                 |            |
+| kube-system     | k8s                 | etcd                    |            |                      |               |                 |            |
+|                 | k8s (control plane) | kube-apiserver          |            |                      |               |                 |            |
+|                 | k8s (control plane) | kube-controller-manager |            |                      |               |                 |            |
+|                 | k8s (control plane) | kube-scheduler          |            |                      |               |                 |            |
+|                 | k8s (DNS)           | coredns                 |            |                      |               |                 |            |
+|                 | k8s                 | kube-proxy              | kube-proxy | kube-proxy           | kube-proxy    | kube-proxy      | kube-proxy |
+|                 | canal (CNI)         | canal                   | canal      | canal                | canal         | canal           | canal      |
+|                 | k8s-dashboard       |                         |            | kubernetes-dashboard |               |                 |            |
+|                 | helm                |                         |            |                      | tiller-deploy |                 |            |
+| metallb-system  | metallb             |                         | speaker    | speaker              | speaker       | speaker         | speaker    |
+|                 | metallb             |                         |            |                      | controller    |                 |            |
+| contour-system  | contour             |                         | contour    |                      | contour       |                 |            |
+| gluster-system  | gluserfs            |                         | glusterfs  | glusterfs            | glusterfs     | glusterfs       | glusterfs  |
+|                 | heketi              |                         | heketi     |                      |               |                 |            |
+| registry-system | docker-registry     |                         |            |                      |               | registry-docker |            |
+| cadvisor-system | cadvisor            | cadvisor                | cadvisor   | cadvisor             | cadvisor      | cadvisor        | cadvisor   |
+
+
 ## Cleanup
 
 While VMs can just be rebuilt after a non successful attempt to install kubernetes with all its plugins and helpers, bare metal boxes need to be cleaned. This involves executables, persisted configurations, run time information, iptables rules, network devices, ... .
 
 ==> [docs/9_Tear_down.md](docs/9_Tear_down.md)
+

@@ -42,3 +42,5 @@
 - Install docker-ce on all nodes
 
         sudo apt-get install docker-ce
+
+[<== Readme](../Readme.md) | [Install Kubernetes Dashboard ==>](2_Install_Kubernetes_Dashboard.md)

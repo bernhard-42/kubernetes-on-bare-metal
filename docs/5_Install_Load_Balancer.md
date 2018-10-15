@@ -39,3 +39,5 @@ Based on [https://metallb.universe.tf/tutorial/layer2/](https://metallb.universe
 
     kubectl delete deploy nginx
     kubectl delete svc nginx
+
+[<== Install Storage Provider](./4_Install_Storage_Provider.md) | [Install Ingress controller ==>](./6_Install_Ingress_controller.md)

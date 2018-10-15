@@ -118,3 +118,5 @@ The installation is adapted be compliant with the `*-system` namespace conventio
     kubectl delete clusterrole contour
     kubectl delete clusterrolebinding contour
     kubectl delete crd ingressroutes.contour.heptio.com
+
+[<== Install Load Balancer](./5_Install_Load_Balancer.md) | [Install Registry ==>](./7_Install_Registry.md)

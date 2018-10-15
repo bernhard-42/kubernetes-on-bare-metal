@@ -146,3 +146,4 @@ Note: From now on it is expected that `kubectl` commands get issued from the lap
             kubectl delete svc kubernetes-bootcamp$i
         done
 
+[<== Preparation](./0_Preparation.md) | [Install Kubernetes Dashboard ==>](./2_Install_Kubernetes_Dashboard.md)
