@@ -37,7 +37,7 @@ Based on [https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/](
         sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 
-## Install network plugin flannel
+## Install network plugin canal
 
 - Install canal on master node
 
