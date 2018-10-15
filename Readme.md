@@ -16,12 +16,12 @@ and to deploy apps as if it would be kubernetes on a cloud provider.
 
 ## Machine Setup
 
-The cluster is built on 6 machines (6 x *ASRock beebox* boxes with 16 GB memory and 4 cores running Ubuntu 16.04). The beeboxes are nice playgroud machines due to their silence and low power consumption while providing sufficient computing power especially for efficient apps and frameworks like Kubernetes (e.g. the java based hadoop framework did not run too well): 
+The cluster is built on 6 machines (small boxes with a 4 core Celeron N3150 and 16 GB memory running Ubuntu 16.04). These boxes are nice playgroud machines due to their silence and low power consumption while providing sufficient computing power especially for efficient apps and frameworks like Kubernetes (e.g. the java based hadoop framework did not run too well): 
 
-- K8s Master: beebox01
-- K8s Nodes: beebox02, ..., beebox06
+- K8s Master machine: beebox01
+- K8s Nodes machines: beebox02, ..., beebox06
 
-Developer Machine: Mac laptop
+Developer machine: Mac laptop
 
 ## Setup Documentation
 
