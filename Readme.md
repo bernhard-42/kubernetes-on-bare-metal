@@ -4,7 +4,7 @@ This is the writeup of building a playground of Kubernetes 1.12.1 on 6 bare meta
 
 The setup was built in order to understand Kubernetes and its ecosystem. It is **not** meant as a blueprint for production. There is no HA involved (even not for etcd), many components are not secured via TLS (e.g. the registry), proper monitoring is missing (e.g. no Prometheus), ...
 
-However it enables importaant Kubernetes features on bare metal including
+However it enables important Kubernetes features on bare metal including
 
 - Network Policies
 - Persistent Storage Provider
