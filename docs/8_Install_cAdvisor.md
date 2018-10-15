@@ -104,4 +104,4 @@
     open http://beebox01:9999
 
 
-[<== Install Registry](./7_Install_Registry.md) | [Tear Down ==>](./9_Tear_Down.md)
+[<== Install Registry](./7_Install_Registry.md) | [Tear Down ==>](./9_Tear_down.md)
