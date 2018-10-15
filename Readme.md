@@ -31,6 +31,25 @@ Developer Machine:
 
 To make it easier to see which component belongs to which of the plugins / helpers, the setup uses namespaces.
 
+|                 |                     | beebox01                | beebox02   | beebox03             | beebox04      | beebox05        | beebox06   |
+|-----------------|---------------------|-------------------------|------------|----------------------|---------------|-----------------|------------|
+| **namespace**   | **tool**            |                         |            |                      |               |                 |            |
+| kube-system     | k8s                 | etcd                    |            |                      |               |                 |            |
+|                 | k8s (control plane) | kube-apiserver          |            |                      |               |                 |            |
+|                 | k8s (control plane) | kube-controller-manager |            |                      |               |                 |            |
+|                 | k8s (control plane) | kube-scheduler          |            |                      |               |                 |            |
+|                 | k8s (DNS)           | coredns                 |            |                      |               |                 |            |
+|                 | k8s                 | kube-proxy              | kube-proxy | kube-proxy           | kube-proxy    | kube-proxy      | kube-proxy |
+|                 | canal (CNI)         | canal                   | canal      | canal                | canal         | canal           | canal      |
+|                 | k8s-dashboard       |                         |            | kubernetes-dashboard |               |                 |            |
+|                 | helm                |                         |            |                      | tiller-deploy |                 |            |
+| metallb-system  | metallb             |                         | speaker    | speaker              | speaker       | speaker         | speaker    |
+|                 | metallb             |                         |            |                      | controller    |                 |            |
+| contour-system  | contour             |                         | contour    |                      | contour       |                 |            |
+| gluster-system  | gluserfs            |                         | glusterfs  | glusterfs            | glusterfs     | glusterfs       | glusterfs  |
+|                 | heketi              |                         | heketi     |                      |               |                 |            |
+| registry-system | docker-registry     |                         |            |                      |               | registry-docker |            |
+| cadvisor-system | cadvisor            | cadvisor                | cadvisor   | cadvisor             | cadvisor      | cadvisor        | cadvisor   |
 ### Prepare Developer laptop and beeboxes
 
 ==> [docs/0_Preparation.md](docs/0_Preparation.md)
